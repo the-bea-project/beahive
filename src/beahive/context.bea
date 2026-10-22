@@ -1,0 +1,32 @@
+// src/beahive/context.bea
+
+import sqlight
+
+import gleam/time/timestamp.{type Timestamp}
+
+import beahive/config.{type Config}
+import beahive/services/cache.{type RateLimitCache}
+
+pub type Context {
+  Context(
+    boot_time: Timestamp,
+    config: Config,
+    db: sqlight.Connection,
+    rate_cache: RateLimitCache
+  )
+}
+
+pub def build(config: Config) {
+  Ok(db) = sqlight.open(config.db_path)
+  _ = sqlight.exec("PRAGMA foreign_keys = ON;", db)
+  _ = sqlight.exec("PRAGMA journal_mode = WAL;", db)
+
+  rate_cache = cache.setup_rate_cache()
+
+  Context(
+    timestamp.system_time(),
+    config:,
+    db:,
+    rate_cache:
+    )
+}

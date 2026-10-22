@@ -1,0 +1,6 @@
+/.beabuild
+*.beam
+*.ez
+erl_crash.dump
+
+.env

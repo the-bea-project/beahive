@@ -1,0 +1,21 @@
+import ewe
+
+import gleam/json
+import gleam/http/request.{type Request}
+import gleam/http/response.{type Response}
+
+import beahive/context.{type Context}
+import beahive_web/utils
+import beahive_web/api/v1/auth/router as auth_router
+
+pub def handle_request(
+  ctx: Context,
+  req: Request(ewe.Connection),
+  path: List(String)
+) -> Response(ewe.Body) {
+  case path {
+    [] -> utils.send_resp_json(200, "V1 router", json.null())
+    ["auth"] -> auth_router.handle_request(ctx, req)
+    _ -> utils.send_resp_json(404, "Global router 404!", json.null())
+  }
+}

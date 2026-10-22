@@ -1,0 +1,24 @@
+// src/beahive.bea
+
+import ewe
+import gleam/erlang/process
+
+import beahive/config
+import beahive/context
+
+import beahive_web/router as global_router
+
+pub def main() {
+  cfg = config.load()
+  ctx = context.build(cfg)
+
+  echo "Server staring on :#{int.to_string(cfg.port)}..."
+
+  _ =
+    ewe.new(handler: fn(req) { global_router.handle_request(ctx, req) })
+    |> ewe.bind(to: cfg.host)
+    |> ewe.listening(on: cfg.port)
+    |> ewe.start
+
+  process.sleep_forever()
+}

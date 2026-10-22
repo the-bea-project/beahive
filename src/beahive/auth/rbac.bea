@@ -1,0 +1,10 @@
+pub type Permissions {
+  Read
+  Write
+  Delete
+}
+
+pub type Roles {
+  Administrator
+  Client(List(Permissions))
+}

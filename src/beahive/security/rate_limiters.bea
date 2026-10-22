@@ -1,0 +1,64 @@
+// src/beahive/security/rate_limiters.bea
+
+import gleam/option.{type Option, Some, None}
+import gleam/time/timestamp
+import gleam/time/duration
+
+import beahive/context.{type Context}
+import beahive/services/cache.{type RateLimitEntry}
+
+def cache_check(ip: String, ctx: Context) -> Option(RateLimitEntry) {
+  cache.get_rate_hits(ctx.rate_cache, ip)
+}
+
+// Returns False if under the limit (allow), True if crossed the limit (block)
+pub def rate_limit_by_ip(ip: String, ctx: Context) -> Bool {
+  now = timestamp.system_time()
+  
+  // Extracting config for cleaner matching
+  attempts = ctx.config.ip_rate_limit_attempts
+  window = ctx.config.ip_rate_limit_window_secs
+  ttl = ctx.config.ip_rate_ttl_secs
+
+  case cache_check(ip, ctx) {
+    Some(cached_data) -> {
+      // Calculate how many seconds have passed since last hit
+      hit_interval_secs =
+        timestamp.difference(now, cached_data.last_hit_at)
+        |> duration.to_seconds() |> float.truncate()
+
+      // Derive new count based on hits and time window
+      count = case window - hit_interval_secs {
+        x if x < 0 -> 0
+        _ if cached_data.count <= attempts -> cached_data.count + 1
+        _ -> cached_data.count
+      }
+
+      case count {
+        c if c <= attempts -> {
+          _ = cache.set_rate_hits(
+            ctx.rate_cache,
+            ip,
+            now,
+            count,
+            ttl
+          )
+          False
+        }
+        _ -> True
+      }
+    }
+    
+    None -> {
+      // Record doesn't exist, add to cache
+      _ = cache.set_rate_hits(
+        ctx.rate_cache,
+        ip,
+        now,
+        1,
+        ttl
+      )
+      False
+    }
+  }
+}

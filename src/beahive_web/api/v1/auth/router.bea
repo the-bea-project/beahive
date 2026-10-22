@@ -1,0 +1,15 @@
+import ewe
+
+import gleam/json
+import gleam/http/request.{type Request}
+import gleam/http/response.{type Response}
+
+import beahive/context.{type Context}
+import beahive_web/utils
+
+pub def handle_request(
+  _ctx: Context,
+  _req: Request(ewe.Connection),
+) -> Response(ewe.Body) {
+  utils.send_resp_json(200, "OK atuh", json.null())
+}
