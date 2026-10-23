@@ -30,7 +30,8 @@ pub def handle_request(
   ctx: Context,
   req: request.Request(ewe.Connection),
 ) -> Response(ewe.Body) {
-  global_middleware.allow(req, ctx) else utils.send_resp_json(429, "Global middleware 429!", json.null())
+  global_middleware.allow(req, ctx)
+    else utils.send_resp_json(429, "Global middleware 429!", json.null())
 
   case req.method, request.path_segments(req) {
     http.Get, [] -> handle_root(ctx)

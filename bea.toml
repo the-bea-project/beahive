@@ -16,5 +16,11 @@ gleam_http = ">= 4.5.0 and < 5.0.0"
 gleam_json = ">= 3.1.0 and < 4.0.0"
 sqlight = ">= 1.2.0 and < 2.0.0"
 rasa = ">= 2.1.0 and < 3.0.0"
+ywt_core = ">= 2.0.0 and < 3.0.0"
+ywt_erlang = ">= 2.0.0 and < 3.0.0"
 
 [dev_dependencies]
+marmot = ">= 1.9.1 and < 2.0.0"
+
+[tools.marmot]
+database = "beahive.sqlite"

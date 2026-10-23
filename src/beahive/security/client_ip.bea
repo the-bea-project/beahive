@@ -11,11 +11,10 @@ import beahive/runtime/runtime
 /// the one to trust.
 pub def client_ip(req: Request(ewe.Connection)) -> Result(ewe.IpAddress, Nil) {
   case ewe.get_client_info(req.body) {
-    ewe.TcpSocketAddress(peer, _) ->
-      case is_loopback(unmap(peer)) {
-        True -> forwarded(req) |> result.or(Ok(unmap(peer)))
-        False -> Ok(unmap(peer))
-      }
+    ewe.TcpSocketAddress(peer, _) -> case is_loopback(unmap(peer)) {
+      True -> forwarded(req) |> result.or(Ok(unmap(peer)))
+      False -> Ok(unmap(peer))
+    }
     ewe.UnixSocketAddress(_) -> forwarded(req)
   }
 }
@@ -53,7 +52,7 @@ def is_loopback(ip: ewe.IpAddress) -> Bool {
 /// of an IPv6 address.
 pub def rate_key(ip: ewe.IpAddress) -> String {
   case ip {
-    ewe.IpV4(..) -> ewe.ip_address_to_string(ip)
+    ewe.IpV4(| _) -> ewe.ip_address_to_string(ip)
     ewe.IpV6(a, b, c, d, _, _, _, _) ->
       ewe.ip_address_to_string(ewe.IpV6(a, b, c, d, 0, 0, 0, 0)) <> "/64"
   }

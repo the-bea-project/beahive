@@ -4,6 +4,7 @@ import dot_env
 import beahive/runtime/runtime
 import gleam/erlang/atom
 import envoy
+import ywt/sign_key
 
 pub type Config {
   Config(
@@ -14,6 +15,9 @@ pub type Config {
     ip_rate_limit_attempts: Int,
     ip_rate_limit_window_secs: Int,
     ip_rate_ttl_secs: Int,
+    admin_username: String,
+    admin_password: String,
+    jwt_secret: sign_key.SignKey,
   )
 }
 
@@ -32,6 +36,9 @@ def do_load() -> Result(Config, Nil) {
     (envoy.get("IP_RATE_LIMIT_ATTEMPTS")? |> int.parse())?,
     (envoy.get("IP_RATE_LIMIT_WINDOW_SECS")? |> int.parse())?,
     (envoy.get("IP_RATE_TTL_SECS")? |> int.parse())?,
+    envoy.get("ADMIN_USERNAME")?,
+    envoy.get("ADMIN_PASSWORD")?,
+    (envoy.get("JWT_SECRET")? |> bit_array.from_string() |> sign_key.hs256())?,
   )
   |> Ok
 }

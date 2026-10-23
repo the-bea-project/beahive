@@ -1,0 +1,7 @@
+import bea_json/decoder
+
+/// The body of `POST /api/v1/auth/admin`.
+@derive(decoder)
+pub type Credentials {
+  Credentials(username: String, password: String)
+}

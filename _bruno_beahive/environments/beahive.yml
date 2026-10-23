@@ -1,0 +1,4 @@
+name: beahive
+variables:
+  - name: base_url
+    value: localhost:8000/api/v1

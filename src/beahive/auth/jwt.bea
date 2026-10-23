@@ -1,0 +1,32 @@
+// src/beahive/auth/jwt.bea
+
+import gleam/json
+import gleam/time/duration
+
+import ywt
+import ywt/claim
+import ywt/sign_key
+
+import beahive/auth/types
+
+pub def generate(auth: types.Authenticated, key: sign_key.SignKey) {
+  types.Authenticated(subject, role) = auth
+
+  role_str = case role {
+    types.Administrator -> "administrator"
+    types.Client(_) -> "client"
+  }
+
+  payload = [("sub", json.string(subject)), ("role", json.string(role_str))]
+
+  claims = [
+    claim.expires_at(
+      max_age: duration.minutes(15),
+      leeway: duration.seconds(0),
+    ),
+    claim.issuer("beahive", []),
+    claim.audience("beahive", []),
+  ]
+
+  ywt.encode(payload, claims, key)
+}

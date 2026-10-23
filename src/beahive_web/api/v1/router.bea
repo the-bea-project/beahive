@@ -1,3 +1,5 @@
+// src/beahive_web/api/v1/router.bea
+
 import ewe
 
 import gleam/json
@@ -14,8 +16,7 @@ pub def handle_request(
   path: List(String),
 ) -> Response(ewe.Body) {
   case path {
-    [] -> utils.send_resp_json(200, "V1 router", json.null())
-    ["auth"] -> auth_router.handle_request(ctx, req)
-    _ -> utils.send_resp_json(404, "Global router 404!", json.null())
+    ["auth" | rest] -> auth_router.handle_request(ctx, req, rest)
+    _ -> utils.send_resp_json(404, "V1 router 404!", json.null())
   }
 }

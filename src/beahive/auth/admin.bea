@@ -1,0 +1,18 @@
+// src/beahive/auth/admin.bea
+
+import beahive/context
+import beahive/auth/jwt
+import beahive/auth/types
+
+pub def check(ctx: context.Context, username: String, password: String) {
+  valid_username = username == ctx.config.admin_username
+  valid_password = password == ctx.config.admin_password
+
+  if valid_username and valid_password {
+    admin = types.Authenticated(subject: "admin", role: types.Administrator)
+    jwt.generate(admin, ctx.config.jwt_secret)
+    |> Ok
+  } else {
+    Error(Nil)
+  }
+}
