@@ -1,11 +1,11 @@
 // src/beahive.bea
 
-import ewe
 import gleam/erlang/process
+
+import ewe
 
 import beahive/config
 import beahive/context
-
 import beahive_web/router as global_router
 
 pub def main() {

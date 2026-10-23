@@ -1,33 +1,13 @@
+import gleam/http/request.{type Request}
+
 import ewe
 
-import gleam/json
-import gleam/http/request.{type Request}
-import gleam/http/response.{type Response}
-
 import beahive/context
+import beahive/security/client_ip
 import beahive/security/rate_limiters
-import beahive_web/utils
 
-def get_client_ip(req: request.Request(ewe.Connection)) -> String {
-  case request.get_header(req, "x-forwarded-for") {
-    Ok(ip) -> ip
-    Error(_) -> 
-      case ewe.get_client_info(req.body) {
-        ewe.TcpSocketAddress(ip, _) -> ewe.ip_address_to_string(ip)
-        ewe.UnixSocketAddress(path) -> "unix:" <> path
-      }
-  }
-}
-
-pub def apply(
-  req: Request(ewe.Connection),
-  ctx: context.Context,
-  next: fn() -> Response(ewe.Body)
-) -> Response(ewe.Body) {
-  ip = get_client_ip(req)
-
-  case rate_limiters.rate_limit_by_ip(ip, ctx) {
-    True -> utils.send_resp_json(429, "Global middleware 429!", json.null())
-    False -> next()
-  }
+/// True when the request may go on.
+pub def allow(req: Request(ewe.Connection), ctx: context.Context) -> Bool {
+  Ok(ip) = client_ip.client_ip(req) else False
+  not rate_limiters.rate_limit_by_ip(client_ip.rate_key(ip), ctx)
 }

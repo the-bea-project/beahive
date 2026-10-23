@@ -7,7 +7,11 @@ import gleam/time/timestamp
 import gleam/time/duration
 
 pub type RateLimitEntry {
-  RateLimitEntry(count: Int, last_hit_at: timestamp.Timestamp, expires_at: timestamp.Timestamp)
+  RateLimitEntry(
+    count: Int,
+    last_hit_at: timestamp.Timestamp,
+    expires_at: timestamp.Timestamp,
+  )
 }
 
 pub type RateLimitCache = table.Table(String, RateLimitEntry)
@@ -19,13 +23,13 @@ pub def setup_rate_cache() {
   |> table.build()
 }
 
-pub def get_rate_hits(
-  cache: RateLimitCache,
-  ip: String
-) {
+pub def get_rate_hits(cache: RateLimitCache, ip: String) {
   case table.lookup(cache, ip) {
     Ok(entry) -> {
-      if timestamp.compare(timestamp.system_time(), entry.expires_at) == order.Lt {
+      if timestamp.compare(
+        timestamp.system_time(),
+        entry.expires_at,
+      ) == order.Lt {
         Some(entry)
       } else {
         _ = table.delete(cache, ip)
@@ -43,6 +47,9 @@ pub def set_rate_hits(
   count: Int,
   ttl_secs: Int,
 ) {
-  expires_at = timestamp.add(timestamp.system_time(), duration.seconds(ttl_secs))
+  expires_at = timestamp.add(
+    timestamp.system_time(),
+    duration.seconds(ttl_secs),
+  )
   table.insert(cache, ip, RateLimitEntry(count:, last_hit_at:, expires_at:))
 }

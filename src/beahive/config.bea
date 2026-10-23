@@ -20,18 +20,18 @@ pub type Config {
 def do_load() -> Result(Config, Nil) {
   // Loads the .env file at project root
   dot_env.load_default()
-  
+
   // Uses FFI to get the app version
   app_version = runtime.app_version(atom.create("beahive"))
 
   Config(
     app_version,
     envoy.get("HOST")?,
-    envoy.get("PORT")? |> int.parse()?,
+    (envoy.get("PORT")? |> int.parse())?,
     envoy.get("DB_PATH")?,
-    envoy.get("IP_RATE_LIMIT_ATTEMPTS")? |> int.parse()?,
-    envoy.get("IP_RATE_LIMIT_WINDOW_SECS")? |> int.parse()?,
-    envoy.get("IP_RATE_TTL_SECS")? |> int.parse()?,
+    (envoy.get("IP_RATE_LIMIT_ATTEMPTS")? |> int.parse())?,
+    (envoy.get("IP_RATE_LIMIT_WINDOW_SECS")? |> int.parse())?,
+    (envoy.get("IP_RATE_TTL_SECS")? |> int.parse())?,
   )
   |> Ok
 }

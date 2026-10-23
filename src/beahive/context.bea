@@ -12,7 +12,7 @@ pub type Context {
     boot_time: Timestamp,
     config: Config,
     db: sqlight.Connection,
-    rate_cache: RateLimitCache
+    rate_cache: RateLimitCache,
   )
 }
 
@@ -23,10 +23,5 @@ pub def build(config: Config) {
 
   rate_cache = cache.setup_rate_cache()
 
-  Context(
-    timestamp.system_time(),
-    config:,
-    db:,
-    rate_cache:
-    )
+  Context(timestamp.system_time(), config:, db:, rate_cache:)
 }

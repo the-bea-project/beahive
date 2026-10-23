@@ -1,0 +1,60 @@
+// src/beahive/security/client_ip.bea
+import gleam/http/request.{type Request}
+
+import ewe
+
+import beahive/runtime/runtime
+
+/// The address of the client. `x-forwarded-for` is only believed when the
+/// connection comes from our own reverse proxy (same machine or a Unix
+/// socket). The proxy appends the address it saw, so the last entry is
+/// the one to trust.
+pub def client_ip(req: Request(ewe.Connection)) -> Result(ewe.IpAddress, Nil) {
+  case ewe.get_client_info(req.body) {
+    ewe.TcpSocketAddress(peer, _) ->
+      case is_loopback(unmap(peer)) {
+        True -> forwarded(req) |> result.or(Ok(unmap(peer)))
+        False -> Ok(unmap(peer))
+      }
+    ewe.UnixSocketAddress(_) -> forwarded(req)
+  }
+}
+
+def forwarded(req: Request(ewe.Connection)) -> Result(ewe.IpAddress, Nil) {
+  request.get_header(req, "x-forwarded-for")
+  |> result.try(fn(value) { string.split(value, ",") |> list.last })
+  |> result.try(runtime.parse_ip)
+  |> result.map(unmap)
+}
+
+/// `::ffff:1.2.3.4` (IPv4 on a dual-stack socket) is the IPv4 address.
+def unmap(ip: ewe.IpAddress) -> ewe.IpAddress {
+  case ip {
+    ewe.IpV6(0, 0, 0, 0, 0, 0xffff, high, low) ->
+      ewe.IpV4(
+        int.bitwise_shift_right(high, 8),
+        int.bitwise_and(high, 0xff),
+        int.bitwise_shift_right(low, 8),
+        int.bitwise_and(low, 0xff),
+      )
+    _ -> ip
+  }
+}
+
+def is_loopback(ip: ewe.IpAddress) -> Bool {
+  case ip {
+    ewe.IpV4(127, _, _, _) -> True
+    ewe.IpV6(0, 0, 0, 0, 0, 0, 0, 1) -> True
+    _ -> False
+  }
+}
+
+/// What to count requests against: an IPv4 address, or the /64 network
+/// of an IPv6 address.
+pub def rate_key(ip: ewe.IpAddress) -> String {
+  case ip {
+    ewe.IpV4(..) -> ewe.ip_address_to_string(ip)
+    ewe.IpV6(a, b, c, d, _, _, _, _) ->
+      ewe.ip_address_to_string(ewe.IpV6(a, b, c, d, 0, 0, 0, 0)) <> "/64"
+  }
+}

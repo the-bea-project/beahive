@@ -14,7 +14,7 @@ def cache_check(ip: String, ctx: Context) -> Option(RateLimitEntry) {
 // Returns False if under the limit (allow), True if crossed the limit (block)
 pub def rate_limit_by_ip(ip: String, ctx: Context) -> Bool {
   now = timestamp.system_time()
-  
+
   // Extracting config for cleaner matching
   attempts = ctx.config.ip_rate_limit_attempts
   window = ctx.config.ip_rate_limit_window_secs
@@ -25,7 +25,8 @@ pub def rate_limit_by_ip(ip: String, ctx: Context) -> Bool {
       // Calculate how many seconds have passed since last hit
       hit_interval_secs =
         timestamp.difference(now, cached_data.last_hit_at)
-        |> duration.to_seconds() |> float.truncate()
+        |> duration.to_seconds()
+        |> float.truncate()
 
       // Derive new count based on hits and time window
       count = case window - hit_interval_secs {
@@ -36,28 +37,16 @@ pub def rate_limit_by_ip(ip: String, ctx: Context) -> Bool {
 
       case count {
         c if c <= attempts -> {
-          _ = cache.set_rate_hits(
-            ctx.rate_cache,
-            ip,
-            now,
-            count,
-            ttl
-          )
+          _ = cache.set_rate_hits(ctx.rate_cache, ip, now, count, ttl)
           False
         }
         _ -> True
       }
     }
-    
+
     None -> {
       // Record doesn't exist, add to cache
-      _ = cache.set_rate_hits(
-        ctx.rate_cache,
-        ip,
-        now,
-        1,
-        ttl
-      )
+      _ = cache.set_rate_hits(ctx.rate_cache, ip, now, 1, ttl)
       False
     }
   }
