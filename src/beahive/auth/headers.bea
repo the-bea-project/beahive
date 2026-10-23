@@ -1,0 +1,11 @@
+import gleam/http/request.{type Request}
+import ewe
+
+pub def bearer_token(req: Request(ewe.Connection)) -> Result(String, Nil) {
+  header = request.get_header(req, "authorization")?
+
+  case string.split(header, " ") {
+    ["Bearer", token] if token != "" -> Ok(token)
+    _ -> Error(Nil)
+  }
+}

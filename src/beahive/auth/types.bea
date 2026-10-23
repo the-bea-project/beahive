@@ -1,5 +1,7 @@
 // src/beahive/auth/types.bea
 
+import bea_json/decoder
+
 pub type Permissions {
   Read
   Write
@@ -13,4 +15,12 @@ pub type Roles {
 
 pub type Authenticated {
   Authenticated(subject: String, role: Roles)
+}
+
+@derive(decoder)
+pub type AuthToken {
+  AuthToken(
+    sub: String,
+    role: String
+  )
 }

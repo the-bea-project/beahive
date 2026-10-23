@@ -8,6 +8,7 @@ import ywt/claim
 import ywt/sign_key
 
 import beahive/auth/types
+import ywt/verify_key
 
 pub def generate(auth: types.Authenticated, key: sign_key.SignKey) {
   types.Authenticated(subject, role) = auth
@@ -29,4 +30,43 @@ pub def generate(auth: types.Authenticated, key: sign_key.SignKey) {
   ]
 
   ywt.encode(payload, claims, key)
+}
+
+pub def verify(
+  token: String,
+  key: sign_key.SignKey
+) {
+  verification_key = verify_key.derived(key)
+
+   claims = [
+    claim.expires_at(
+      max_age: duration.minutes(15),
+      leeway: duration.seconds(0),
+    ),
+    claim.issuer("beahive", []),
+    claim.audience("beahive", []),
+  ]
+
+  result = ywt.decode(
+    token,
+    using: types.AuthToken.decoder(),
+    claims:,
+    keys: [verification_key]
+  )
+
+  case result {
+    Ok(types.AuthToken(subject, role)) -> {
+      case subject, role {
+        "admin", "administrator" ->
+          Ok(types.Authenticated(
+            subject: "admin",
+            role: types.Administrator,
+          ))
+
+        _, _ -> Error(Nil)
+      }
+    }
+
+    Error(_) -> Error(Nil)
+  }
 }
