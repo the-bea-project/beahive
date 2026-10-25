@@ -1,0 +1,65 @@
+// src/beahive_web/api/v1/client/router.bea
+
+import gleam/http
+import gleam/http/request.{type Request}
+import gleam/http/response.{type Response}
+import gleam/json
+
+import ewe
+
+import beahive/context.{type Context}
+import beahive_web/api/v1/auth/middleware as auth_middleware
+import beahive_web/api/v1/client/types.{type RegisterRequest, RegisterRequest}
+import beahive_web/api/v1/client/validation
+import beahive_web/utils
+
+pub def handle_request(
+  ctx: Context,
+  req: Request(ewe.Connection),
+  path: List(String),
+) -> Response(ewe.Body) {
+  case req.method, path {
+    http.Get, ["register"] -> handle_register(ctx, req)
+    _, _ -> utils.send_resp_json(404, "Auth router 404!", json.null())
+  }
+}
+
+def handle_register(ctx: Context, req: Request(ewe.Connection)) {
+  auth_middleware.admin_only(ctx, req)
+    else utils.send_resp_json(
+      404,
+      "Auth middleware 404!",
+      json.object([
+        (
+          "reason",
+          json.string("You aren't Administrator / Your token has expired!"),
+        ),
+      ]),
+    )
+
+  req = ewe.read_body(req, limit: 4096)?
+    else _ -> utils.send_resp_json(413, "Body too large", json.null())
+
+  RegisterRequest(username:, password:, permissions:) = json.parse_bits(
+    req.body,
+    RegisterRequest.decoder(),
+  )?
+    else e -> utils.send_resp_json(
+      400,
+      "Invalid RegisterRequest",
+      json.object([
+        ("reason", json.string("#{string.inspect(e)}"))
+      ]),
+    )
+
+  _permissions = validation.reg_req(username, password, permissions)?
+    else e -> utils.send_resp_json(
+      400,
+      "Request failed validation",
+      json.object([
+        ("reason", json.string("#{string.inspect(e)}"))
+      ]),
+    )
+
+  utils.send_resp_json(200, "Created!", json.null())
+}

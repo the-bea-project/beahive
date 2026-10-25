@@ -1,0 +1,17 @@
+import gleam/http/request
+
+import ewe
+
+import beahive/auth/headers
+import beahive/auth/jwt
+import beahive/auth/types
+import beahive/context
+
+pub def admin_only(ctx: context.Context, req: request.Request(ewe.Connection)) {
+  token = headers.bearer_token(req)? else False
+
+  types.Authenticated(_, role:) = jwt.verify(token, ctx.config.jwt_secret)?
+    else False
+
+  role == types.Administrator
+}

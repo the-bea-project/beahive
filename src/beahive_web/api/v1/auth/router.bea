@@ -11,8 +11,6 @@ import beahive/auth/admin
 import beahive/context.{type Context}
 import beahive_web/api/v1/auth/types.{type LoginRequest, LoginRequest}
 import beahive_web/utils
-import beahive/auth/headers
-import beahive/auth/jwt
 
 pub def handle_request(
   ctx: Context,
@@ -21,7 +19,6 @@ pub def handle_request(
 ) -> Response(ewe.Body) {
   case req.method, path {
     http.Get, ["admin"] -> handle_admin(ctx, req)
-    http.Get, ["verify"] -> h(ctx, req)
     _, _ -> utils.send_resp_json(404, "Auth router 404!", json.null())
   }
 }
@@ -54,19 +51,5 @@ def handle_admin(
     200,
     "Logged in",
     json.object([("Bearer Token", json.string(token))]),
-  )
-}
-
-pub def h(ctx: context.Context, req: Request(ewe.Connection)) {
-  token = headers.bearer_token(req)?
-    else _ -> utils.send_resp_json(401, "Missing or invalid Bearer token", json.null())
-
-  auth = jwt.verify(token, ctx.config.jwt_secret)?
-    else _ -> utils.send_resp_json(401, "Invalid or expired token", json.null())
-
-  utils.send_resp_json(
-    200,
-    "Token valid!",
-    json.string(auth.subject),
   )
 }

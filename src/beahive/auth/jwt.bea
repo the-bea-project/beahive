@@ -32,13 +32,10 @@ pub def generate(auth: types.Authenticated, key: sign_key.SignKey) {
   ywt.encode(payload, claims, key)
 }
 
-pub def verify(
-  token: String,
-  key: sign_key.SignKey
-) {
+pub def verify(token: String, key: sign_key.SignKey) {
   verification_key = verify_key.derived(key)
 
-   claims = [
+  claims = [
     claim.expires_at(
       max_age: duration.minutes(15),
       leeway: duration.seconds(0),
@@ -51,17 +48,14 @@ pub def verify(
     token,
     using: types.AuthToken.decoder(),
     claims:,
-    keys: [verification_key]
+    keys: [verification_key],
   )
 
   case result {
     Ok(types.AuthToken(subject, role)) -> {
       case subject, role {
         "admin", "administrator" ->
-          Ok(types.Authenticated(
-            subject: "admin",
-            role: types.Administrator,
-          ))
+          Ok(types.Authenticated(subject: "admin", role: types.Administrator))
 
         _, _ -> Error(Nil)
       }

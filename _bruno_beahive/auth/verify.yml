@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{base_url}}/auth/verify"
+  url: "{{base_url}}/auth/adminonly"
   auth:
     type: bearer
     token: "{{auth_tok}}"

@@ -1,0 +1,12 @@
+import bea_json/decoder
+
+@derive(decoder)
+pub type RegisterRequest {
+  RegisterRequest(username: String, password: String, permissions: List(String))
+}
+
+pub type ValidationError {
+  InvalidUsername(String)
+  InvalidPassword(String)
+  InvalidPermission(String)
+}

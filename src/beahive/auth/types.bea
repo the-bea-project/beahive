@@ -14,13 +14,9 @@ pub type Roles {
 }
 
 pub type Authenticated {
-  Authenticated(subject: String, role: Roles)
+  subject: String,
+  role: Roles,
 }
 
 @derive(decoder)
-pub type AuthToken {
-  AuthToken(
-    sub: String,
-    role: String
-  )
-}
+pub type AuthToken { sub: String, role: String }
