@@ -2,7 +2,7 @@ import gleam/http/request
 
 import ewe
 
-import beahive/auth/headers
+import beahive_web/api/v1/auth/headers
 import beahive/auth/jwt
 import beahive/auth/types
 import beahive/context

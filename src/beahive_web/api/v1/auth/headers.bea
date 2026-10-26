@@ -1,3 +1,5 @@
+// src/beahive/auth/headers.bea
+
 import gleam/http/request.{type Request}
 import ewe
 

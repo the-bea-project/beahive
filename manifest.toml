@@ -8,6 +8,7 @@
 
 packages = [
   { name = "alpacki", version = "3.0.1", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "alpacki", source = "hex", outer_checksum = "5BCB617A9606E56018790D4F24AB1E06B6D05BC17ACD6686B99E8D4D18B1F5FD" },
+  { name = "argus", version = "2.0.0", build_tools = ["gleam"], requirements = ["gleam_stdlib", "jargon"], otp_app = "argus", source = "hex", outer_checksum = "EA1619E9480C4CAA18BB126D72D2635494FB4AA5D1103C0A047F6D0368774430" },
   { name = "argv", version = "1.1.0", build_tools = ["gleam"], requirements = [], otp_app = "argv", source = "hex", outer_checksum = "3277D100448BDB4A29B6D58C0F36F631CBC349E8BDD09766C6309DF202831140" },
   { name = "bigi", version = "4.1.1", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "bigi", source = "hex", outer_checksum = "44FEDF1DF5C1F426A80B67C32B976D0828D66524E11BDC2DD22B78D37C883BA7" },
   { name = "dot_env", version = "1.3.0", build_tools = ["gleam"], requirements = ["gleam_stdlib", "simplifile"], otp_app = "dot_env", source = "hex", outer_checksum = "EAEEC6B7030D9FE911FF22D0CA459D270AABDAF77F790871A15180813EE21D9F" },
@@ -23,6 +24,7 @@ packages = [
   { name = "gleam_otp", version = "1.3.0", build_tools = ["gleam"], requirements = ["gleam_erlang", "gleam_stdlib"], otp_app = "gleam_otp", source = "hex", outer_checksum = "DE4CA6850842F0266EE95317A25DD6A0A0F20CDFAB7C0ADC2E63251D7C3C72EC" },
   { name = "gleam_stdlib", version = "1.0.5", build_tools = ["gleam"], requirements = [], otp_app = "gleam_stdlib", source = "hex", outer_checksum = "CEE5B6C076A85B45F60C585F4316C63EC8B7127C119D5738C3958A9C4D50404E" },
   { name = "gleam_time", version = "1.11.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleam_time", source = "hex", outer_checksum = "3AB789C3ED4EB9DDA7283F46C3CF83A5487C9CFB790DC3FF8F8ACB5BF7B7A6C1" },
+  { name = "jargon", version = "1.1.0", build_tools = ["rebar3"], requirements = [], otp_app = "jargon", source = "hex", outer_checksum = "963FCD2E851F5FCF3821638C088EA1EF07365187319B9145A1D12DD3980162CA" },
   { name = "logging", version = "1.5.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "logging", source = "hex", outer_checksum = "BC5F18CE5DD9686100229FE5409BDC3DD5C46D5A7DF2F804AD2D8F0DD6C5060E" },
   { name = "marmot", version = "1.9.1", build_tools = ["gleam"], requirements = ["argv", "gleam_stdlib", "gleam_time", "simplifile", "sqlight", "tom"], otp_app = "marmot", source = "hex", outer_checksum = "60FAD27002BE41EF8B1C24499B614C8BD52D07057E17A0A8466EB784F0DE11DD" },
   { name = "rasa", version = "2.1.0", build_tools = ["gleam"], requirements = ["gleam_erlang", "gleam_stdlib"], otp_app = "rasa", source = "hex", outer_checksum = "AE8DE720268FD3D106C970A321C9077D301D392FFF47061C8BFC05D63F8BD12F" },
@@ -38,6 +40,7 @@ packages = [
 ]
 
 [requirements]
+argus = { version = ">= 2.0.0 and < 3.0.0" }
 dot_env = { version = ">= 1.3.0 and < 2.0.0" }
 envoy = { version = ">= 1.2.0 and < 2.0.0" }
 ewe = { version = ">= 9.0.0 and < 10.0.0" }

@@ -3,4 +3,10 @@
 *.ez
 erl_crash.dump
 
+# Sensitive
 .env
+
+# SQLite database files
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal/build/

@@ -12,6 +12,7 @@ import beahive_web/api/v1/auth/middleware as auth_middleware
 import beahive_web/api/v1/client/types.{type RegisterRequest, RegisterRequest}
 import beahive_web/api/v1/client/validation
 import beahive_web/utils
+import beahive/client/manager
 
 pub def handle_request(
   ctx: Context,
@@ -52,7 +53,7 @@ def handle_register(ctx: Context, req: Request(ewe.Connection)) {
       ]),
     )
 
-  _permissions = validation.reg_req(username, password, permissions)?
+  permissions = validation.reg_req(username, password, permissions)?
     else e -> utils.send_resp_json(
       400,
       "Request failed validation",
@@ -60,6 +61,10 @@ def handle_register(ctx: Context, req: Request(ewe.Connection)) {
         ("reason", json.string("#{string.inspect(e)}"))
       ]),
     )
+
+  manager.register(ctx, username, password, permissions)? else e -> utils.send_resp_json(400, "Failed to register client!", json.object([
+    ("reason", json.string("#{string.inspect(e)}"))
+  ]))
 
   utils.send_resp_json(200, "Created!", json.null())
 }

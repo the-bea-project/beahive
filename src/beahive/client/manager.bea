@@ -1,0 +1,48 @@
+// src/beahive/client/manager.bea
+import beahive/context
+import beahive/auth/types
+
+import argus
+import generated/sql/beahive_sql
+
+pub type RegisterationError(hash_error, db_error) {
+  HashingFailed(hash_error)
+  DatabaseFailed(db_error)
+}
+
+def bool_to_int(value: Bool) -> Int
+
+def bool_to_int(False) {
+  0
+}
+
+def bool_to_int(True) {
+  1
+}
+
+pub def register(
+  ctx: context.Context,
+  username: String,
+  password: String,
+  permissions: List(types.Permissions)
+) {
+  // Argon2id with a random salt
+  hash = argus.hash(argus.hasher(), password)? else e -> Error(HashingFailed(e))
+  password_hash = hash.encoded_hash
+
+  // Convert permissions into DB flags
+  can_read = list.contains(permissions, types.Read) |> bool_to_int
+  can_write = list.contains(permissions, types.Write) |> bool_to_int
+  can_delete = list.contains(permissions, types.Delete) |> bool_to_int
+
+  _ = beahive_sql.create_client(
+    db: ctx.db,
+    username:,
+    password_hash:,
+    can_read:,
+    can_write:,
+    can_delete:
+  )? else e -> Error(DatabaseFailed(e))
+
+  Ok(Nil)
+}
