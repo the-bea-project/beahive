@@ -20,7 +20,7 @@ pub def handle_request(
   path: List(String),
 ) -> Response(ewe.Body) {
   case req.method, path {
-    http.Get, ["register"] -> handle_register(ctx, req)
+    http.Post, ["register"] -> handle_register(ctx, req)
     _, _ -> utils.send_resp_json(404, "Auth router 404!", json.null())
   }
 }
@@ -28,8 +28,8 @@ pub def handle_request(
 def handle_register(ctx: Context, req: Request(ewe.Connection)) {
   auth_middleware.admin_only(ctx, req)
     else utils.send_resp_json(
-      404,
-      "Auth middleware 404!",
+      403,
+      "Auth middleware 403!",
       json.object([
         (
           "reason",
@@ -46,25 +46,24 @@ def handle_register(ctx: Context, req: Request(ewe.Connection)) {
     RegisterRequest.decoder(),
   )?
     else e -> utils.send_resp_json(
-      400,
+      401,
       "Invalid RegisterRequest",
-      json.object([
-        ("reason", json.string("#{string.inspect(e)}"))
-      ]),
+      json.object([("reason", json.string("#{string.inspect(e)}"))]),
     )
 
   permissions = validation.reg_req(username, password, permissions)?
     else e -> utils.send_resp_json(
       400,
       "Request failed validation",
-      json.object([
-        ("reason", json.string("#{string.inspect(e)}"))
-      ]),
+      json.object([("reason", json.string("#{string.inspect(e)}"))]),
     )
 
-  manager.register(ctx, username, password, permissions)? else e -> utils.send_resp_json(400, "Failed to register client!", json.object([
-    ("reason", json.string("#{string.inspect(e)}"))
-  ]))
+  manager.register(ctx, username, password, permissions)?
+    else e -> utils.send_resp_json(
+      400,
+      "Failed to register client!",
+      json.object([("reason", json.string("#{string.inspect(e)}"))]),
+    )
 
-  utils.send_resp_json(200, "Created!", json.null())
+  utils.send_resp_json(201, "Created!", json.null())
 }

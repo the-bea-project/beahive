@@ -1,0 +1,49 @@
+// src/beahive/auth/admin.bea
+
+import beahive/context
+import beahive/client/manager
+import argus
+import beahive/errors
+import beahive/auth/types
+import beahive/auth/jwt
+import sqlight
+
+def parse_permissions(can_read: Int, can_write: Int, can_delete: Int) -> List(types.Permissions) {
+  acc = []
+
+  acc = if can_read == 1 {
+    [types.Read | acc]
+  } else {
+    acc
+  }
+
+  acc = if can_write == 1 {
+    [types.Write | acc]
+  } else {
+    acc
+  }
+
+  acc = if can_delete == 1 {
+    [types.Delete | acc]
+  } else {
+    acc
+  }
+
+  acc
+}
+
+pub def check(ctx: context.Context, username: String, password: String) -> Result(String, errors.ClientError(argus.HashError, sqlight.Error)){
+  client_row = manager.get_client(ctx, username)?
+  valid = argus.verify(client_row.password_hash, password)?
+    else e -> Error(errors.HashingFailed(e))
+
+  valid else Error(errors.InvalidPassword)
+  client_row.enabled == 1 else Error(errors.ClientDisabled)
+
+  permissions = parse_permissions(client_row.can_read, client_row.can_write, client_row.can_delete)
+
+  client = types.Authenticated(subject: username, role: types.Client(permissions))
+
+  jwt.generate(client, ctx.config.jwt_secret)
+  |> Ok
+}

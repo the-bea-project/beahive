@@ -8,6 +8,7 @@ import gleam/json
 import ewe
 
 import beahive/auth/admin
+import beahive/auth/client
 import beahive/context.{type Context}
 import beahive_web/api/v1/auth/types.{type LoginRequest, LoginRequest}
 import beahive_web/utils
@@ -18,7 +19,8 @@ pub def handle_request(
   path: List(String),
 ) -> Response(ewe.Body) {
   case req.method, path {
-    http.Get, ["admin"] -> handle_admin(ctx, req)
+    http.Post, ["admin"] -> handle_admin(ctx, req)
+    http.Post, ["client"] -> handle_client(ctx, req)
     _, _ -> utils.send_resp_json(404, "Auth router 404!", json.null())
   }
 }
@@ -45,6 +47,36 @@ def handle_admin(
       401,
       "Wrong username or password",
       json.null(),
+    )
+
+  utils.send_resp_json(
+    200,
+    "Logged in",
+    json.object([("Bearer Token", json.string(token))]),
+  )
+}
+
+def handle_client(ctx: Context, req: Request(ewe.Connection)) {
+  req = ewe.read_body(req, limit: 4096)?
+    else _ -> utils.send_resp_json(413, "Body too large", json.null())
+
+  LoginRequest(username:, password:) = json.parse_bits(
+    req.body,
+    LoginRequest.decoder(),
+  )?
+    else e -> utils.send_resp_json(
+      400,
+      "Invalid LoginRequest: #{string.inspect(e)}",
+      json.null(),
+    )
+
+  token = client.check(ctx, username, password)?
+    else e -> utils.send_resp_json(
+      401,
+      "Client check failed",
+      json.object([
+        ("reason", json.string("#{string.inspect(e)}"))
+      ]),
     )
 
   utils.send_resp_json(

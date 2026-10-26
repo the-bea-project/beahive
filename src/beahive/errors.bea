@@ -1,0 +1,7 @@
+pub type ClientError(hash_error, db_error) {
+  HashingFailed(hash_error)
+  DatabaseFailed(db_error)
+  ClientNotFound
+  InvalidPassword
+  ClientDisabled
+}

@@ -11,7 +11,7 @@ import beahive_web/router as global_router
 pub def main() {
   cfg = config.load()
   ctx = context.build(cfg)
-  
+
   _ =
     ewe.new(handler: fn(req) { global_router.handle_request(ctx, req) })
     |> ewe.bind(to: cfg.host)

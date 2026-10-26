@@ -9,4 +9,5 @@ erl_crash.dump
 # SQLite database files
 *.sqlite
 *.sqlite-shm
-*.sqlite-wal/build/
+*.sqlite-wal
+/build/

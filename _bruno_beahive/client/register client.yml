@@ -4,19 +4,19 @@ info:
   seq: 1
 
 http:
-  method: GET
+  method: POST
   url: "{{base_url}}/client/register"
   body:
     type: json
     data: |-
       {
-        "username": "c12",
+        "username": "c13",
         "password": "clientpass123",
-        "permissions": ["read"]
+        "permissions": ["read", "write"]
       }
   auth:
     type: bearer
-    token: "{{auth_tok}}"
+    token: "{{admin_auth_tok}}"
 
 settings:
   encodeUrl: true
