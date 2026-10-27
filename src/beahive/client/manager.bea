@@ -1,10 +1,12 @@
-// src/beahive/client/manager.bea
-import beahive/context
-import beahive/auth/types
+//// Clients in the database: registering one, looking one up, listing
+//// them. Queries are Marmot's generated functions (`src/beahive/sql/`).
 
 import argus
-import generated/sql/beahive_sql
+
+import beahive/context
 import beahive/errors
+import beahive/types
+import generated/sql/beahive_sql
 
 def bool_to_int(value: Bool) -> Int
 
@@ -16,21 +18,25 @@ def bool_to_int(True) {
   1
 }
 
+/// Registers a client with an Argon2id-hashed password and global
+/// permissions.
 pub def register(
   ctx: context.Context,
   username: String,
   password: String,
   permissions: List(types.Permissions),
 ) {
-  // Argon2id with a random salt
+  // Argon2id with a random salt. The encoded hash keeps the salt and the
+  // parameters, which is all verification needs later.
   hash = argus.hash(argus.hasher(), password)? else e -> Error(errors.HashingFailed(e))
   password_hash = hash.encoded_hash
 
-  // Convert permissions into DB flags
+  // Permissions as SQLite's 0/1 flags.
   can_read = list.contains(permissions, types.Read) |> bool_to_int
   can_write = list.contains(permissions, types.Write) |> bool_to_int
   can_delete = list.contains(permissions, types.Delete) |> bool_to_int
 
+  // A taken username violates the table's constraint: `DatabaseFailed`.
   _ = beahive_sql.create_client(
     db: ctx.db,
     username:,
@@ -43,6 +49,7 @@ pub def register(
   Ok(Nil)
 }
 
+/// The client's row, password hash included, or `ClientNotFound`.
 pub def get_client(ctx: context.Context, username: String) {
   rows = beahive_sql.get_client(
     db: ctx.db,
@@ -53,4 +60,9 @@ pub def get_client(ctx: context.Context, username: String) {
     [client] -> Ok(client)
     _ -> Error(errors.ClientNotFound)
   }
+}
+
+/// Every client, without password hashes, by username.
+pub def list(ctx: context.Context) {
+  beahive_sql.list_clients(db: ctx.db)
 }

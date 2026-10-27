@@ -1,9 +1,11 @@
-// src/beahive/auth/admin.bea
+//// Administrator login, against the credentials in the configuration.
 
-import beahive/context
 import beahive/auth/jwt
-import beahive/auth/types
+import beahive/context
+import beahive/types
 
+/// A token for the administrator when the username and password match
+/// `ADMIN_USERNAME` and `ADMIN_PASSWORD`.
 pub def check(ctx: context.Context, username: String, password: String) {
   valid_username = username == ctx.config.admin_username
   valid_password = password == ctx.config.admin_password

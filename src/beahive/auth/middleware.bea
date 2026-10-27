@@ -1,13 +1,18 @@
+//// Authorization checks for routes that need a token.
+
 import gleam/http/request
 
 import ewe
 
-import beahive_web/api/v1/auth/headers
+import beahive/auth/headers
 import beahive/auth/jwt
-import beahive/auth/types
 import beahive/context
+import beahive/types
 
+/// True when the request carries a valid, unexpired administrator token.
 pub def admin_only(ctx: context.Context, req: request.Request(ewe.Connection)) {
+  // Each guard returns False from the function: no token, or one that
+  // doesn't verify.
   token = headers.bearer_token(req)? else False
 
   types.Authenticated(_, role:) = jwt.verify(token, ctx.config.jwt_secret)?

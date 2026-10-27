@@ -1,4 +1,5 @@
-// src/beahive.bea
+//// Beahive's entry point: loads the configuration, opens the database and
+//// serves HTTP with ewe.
 
 import gleam/erlang/process
 
@@ -6,14 +7,14 @@ import ewe
 
 import beahive/config
 import beahive/context
-import beahive_web/router as global_router
+import beahive/router
 
 pub def main() {
   cfg = config.load()
   ctx = context.build(cfg)
 
   _ =
-    ewe.new(handler: fn(req) { global_router.handle_request(ctx, req) })
+    ewe.new(handler: fn(req) { router.handle_request(ctx, req) })
     |> ewe.bind(to: cfg.host)
     |> ewe.listening(on: cfg.port)
     |> ewe.start

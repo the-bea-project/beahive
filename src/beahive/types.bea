@@ -1,0 +1,41 @@
+//// The application's shared types: who is calling and what they may do,
+//// the JWT payload, and the bodies of API requests.
+
+import bea_json/decoder
+
+/// What a client may do. Permissions are global: they apply to the whole
+/// store.
+pub type Permissions {
+  Read
+  Write
+  Delete
+}
+
+/// The role a token carries.
+pub type Roles {
+  Administrator
+  Client(List(Permissions))
+}
+
+/// A caller whose credentials or token have been checked.
+pub type Authenticated {
+  subject: String,
+  role: Roles,
+}
+
+/// Beahive's own JWT claims: the subject, and its role as text
+/// (`"administrator"` or `"client"`).
+@derive(decoder)
+pub type AuthToken { sub: String, role: String }
+
+/// The body of `POST /api/v1/auth/admin` and `POST /api/v1/auth/client`.
+@derive(decoder)
+pub type LoginRequest {
+  LoginRequest(username: String, password: String)
+}
+
+/// The body of `POST /api/v1/client/register`.
+@derive(decoder)
+pub type RegisterRequest {
+  RegisterRequest(username: String, password: String, permissions: List(String))
+}

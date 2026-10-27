@@ -1,13 +1,16 @@
-// src/beahive/auth/admin.bea
+//// Client login, against the clients stored in SQLite.
 
-import beahive/context
-import beahive/client/manager
 import argus
-import beahive/errors
-import beahive/auth/types
-import beahive/auth/jwt
 import sqlight
 
+import beahive/auth/jwt
+import beahive/client/manager
+import beahive/context
+import beahive/errors
+import beahive/types
+
+// SQLite's 0/1 permission flags as `Permissions`. Each rebinding of `acc`
+// is a new list; nothing is mutated.
 def parse_permissions(can_read: Int, can_write: Int, can_delete: Int) -> List(types.Permissions) {
   acc = []
 
@@ -32,8 +35,15 @@ def parse_permissions(can_read: Int, can_write: Int, can_delete: Int) -> List(ty
   acc
 }
 
+/// A token for the client when the password matches its stored hash and the
+/// client is enabled. The token carries the username and the `client` role;
+/// the permissions are read from the database but aren't in the token.
 pub def check(ctx: context.Context, username: String, password: String) -> Result(String, errors.ClientError(argus.HashError, sqlight.Error)){
+  // An unknown username or a database error returns from here.
   client_row = manager.get_client(ctx, username)?
+
+  // The stored Argon2id hash embeds its salt and parameters, so Argus can
+  // check the password against it directly.
   valid = argus.verify(client_row.password_hash, password)?
     else e -> Error(errors.HashingFailed(e))
 

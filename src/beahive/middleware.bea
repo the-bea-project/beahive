@@ -1,3 +1,5 @@
+//// Middleware every request goes through, before routing.
+
 import gleam/http/request.{type Request}
 
 import ewe
@@ -6,7 +8,8 @@ import beahive/context
 import beahive/security/client_ip
 import beahive/security/rate_limiters
 
-/// True when the request may go on.
+/// True when the request may go on: its client address is known and under
+/// the rate limit. IPv6 clients are counted by /64 network.
 pub def allow(req: Request(ewe.Connection), ctx: context.Context) -> Bool {
   Ok(ip) = client_ip.client_ip(req) else False
   not rate_limiters.rate_limit_by_ip(client_ip.rate_key(ip), ctx)

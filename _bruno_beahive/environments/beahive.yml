@@ -4,7 +4,7 @@ variables:
     value: localhost:8000/api/v1
     description: ""
   - name: admin_auth_tok
-    value: eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiZWFoaXZlIiwiZXhwIjoxNzkzMDM2ODE1LCJpc3MiOiJiZWFoaXZlIiwicm9sZSI6ImFkbWluaXN0cmF0b3IiLCJzdWIiOiJhZG1pbiJ9.StKqzym67YHC9ITL6Es22eVpVqvtFVs2MFuIqqdxZm4
+    value: eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiZWFoaXZlIiwiZXhwIjoxNzkzMDg3MDY0LCJpc3MiOiJiZWFoaXZlIiwicm9sZSI6ImFkbWluaXN0cmF0b3IiLCJzdWIiOiJhZG1pbiJ9.LYxtcLNy3DWu-JpiNHFGmenPM7P-CZzHpnCqqk2ejHY
     description: ""
   - name: client_auth_tok
     value: ""

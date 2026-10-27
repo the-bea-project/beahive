@@ -1,4 +1,4 @@
-// src/beahive_web/api/v1/auth/router.bea
+//// `/api/v1/auth/…`: logins, which answer with a bearer token.
 
 import gleam/http
 import gleam/http/request.{type Request}
@@ -10,8 +10,8 @@ import ewe
 import beahive/auth/admin
 import beahive/auth/client
 import beahive/context.{type Context}
-import beahive_web/api/v1/auth/types.{type LoginRequest, LoginRequest}
-import beahive_web/utils
+import beahive/responses
+import beahive/types.{type LoginRequest, LoginRequest}
 
 pub def handle_request(
   ctx: Context,
@@ -21,57 +21,59 @@ pub def handle_request(
   case req.method, path {
     http.Post, ["admin"] -> handle_admin(ctx, req)
     http.Post, ["client"] -> handle_client(ctx, req)
-    _, _ -> utils.send_resp_json(404, "Auth router 404!", json.null())
+    _, _ -> responses.send_resp_json(404, "Auth router 404!", json.null())
   }
 }
 
+/// `POST /api/v1/auth/admin`: each step returns its error response early.
 def handle_admin(
   ctx: Context,
   req: Request(ewe.Connection),
 ) -> Response(ewe.Body) {
   req = ewe.read_body(req, limit: 4096)?
-    else _ -> utils.send_resp_json(413, "Body too large", json.null())
+    else _ -> responses.send_resp_json(413, "Body too large", json.null())
 
   LoginRequest(username:, password:) = json.parse_bits(
     req.body,
     LoginRequest.decoder(),
   )?
-    else e -> utils.send_resp_json(
+    else e -> responses.send_resp_json(
       400,
       "Invalid LoginRequest: #{string.inspect(e)}",
       json.null(),
     )
 
   token = admin.check(ctx, username, password)?
-    else _ -> utils.send_resp_json(
+    else _ -> responses.send_resp_json(
       401,
       "Wrong username or password",
       json.null(),
     )
 
-  utils.send_resp_json(
+  responses.send_resp_json(
     200,
     "Logged in",
     json.object([("Bearer Token", json.string(token))]),
   )
 }
 
+/// `POST /api/v1/auth/client`: the 401's reason names the `ClientError`.
 def handle_client(ctx: Context, req: Request(ewe.Connection)) {
   req = ewe.read_body(req, limit: 4096)?
-    else _ -> utils.send_resp_json(413, "Body too large", json.null())
+    else _ -> responses.send_resp_json(413, "Body too large", json.null())
 
   LoginRequest(username:, password:) = json.parse_bits(
     req.body,
     LoginRequest.decoder(),
   )?
-    else e -> utils.send_resp_json(
+    else e -> responses.send_resp_json(
       400,
       "Invalid LoginRequest: #{string.inspect(e)}",
       json.null(),
     )
 
   token = client.check(ctx, username, password)?
-    else e -> utils.send_resp_json(
+    else e -> responses.send_resp_json(
       401,
       "Client check failed",
       json.object([
@@ -79,7 +81,7 @@ def handle_client(ctx: Context, req: Request(ewe.Connection)) {
       ]),
     )
 
-  utils.send_resp_json(
+  responses.send_resp_json(
     200,
     "Logged in",
     json.object([("Bearer Token", json.string(token))]),

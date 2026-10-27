@@ -1,0 +1,95 @@
+//// `/api/v1/client/…`: client management, for the administrator only.
+
+import gleam/http
+import gleam/http/request.{type Request}
+import gleam/http/response.{type Response}
+import gleam/json
+
+import ewe
+
+import beahive/auth/middleware as auth_middleware
+import beahive/client/manager
+import beahive/context.{type Context}
+import beahive/responses
+import beahive/types.{type RegisterRequest, RegisterRequest}
+import beahive/validation
+
+pub def handle_request(
+  ctx: Context,
+  req: Request(ewe.Connection),
+  path: List(String),
+) -> Response(ewe.Body) {
+  case req.method, path {
+    http.Post, ["register"] -> handle_register(ctx, req)
+    http.Get, ["list"] -> handle_list(ctx, req)
+    _, _ -> responses.send_resp_json(404, "Auth router 404!", json.null())
+  }
+}
+
+/// `POST /api/v1/client/register`.
+def handle_register(ctx: Context, req: Request(ewe.Connection)) {
+  // Return early when the bearer token isn't an administrator's.
+  auth_middleware.admin_only(ctx, req)
+    else responses.send_resp_json(
+      403,
+      "Auth middleware 403!",
+      json.object([
+        (
+          "reason",
+          json.string("You aren't Administrator / Your token has expired!"),
+        ),
+      ]),
+    )
+
+  req = ewe.read_body(req, limit: 4096)?
+    else _ -> responses.send_resp_json(413, "Body too large", json.null())
+
+  RegisterRequest(username:, password:, permissions:) = json.parse_bits(
+    req.body,
+    RegisterRequest.decoder(),
+  )?
+    else e -> responses.send_resp_json(
+      401,
+      "Invalid RegisterRequest",
+      json.object([("reason", json.string("#{string.inspect(e)}"))]),
+    )
+
+  permissions = validation.reg_req(username, password, permissions)?
+    else e -> responses.send_resp_json(
+      400,
+      "Request failed validation",
+      json.object([("reason", json.string("#{string.inspect(e)}"))]),
+    )
+
+  manager.register(ctx, username, password, permissions)?
+    else e -> responses.send_resp_json(
+      400,
+      "Failed to register client!",
+      json.object([("reason", json.string("#{string.inspect(e)}"))]),
+    )
+
+  responses.send_resp_json(201, "Created!", json.null())
+}
+
+/// `GET /api/v1/client/list`. Work in progress: the clients are queried and
+/// printed on the server (`echo`), and the response doesn't include them
+/// yet (`responses.ClientListResponse` is meant for that).
+def handle_list(ctx: context.Context, req: Request(ewe.Connection)) {
+  auth_middleware.admin_only(ctx, req)
+    else responses.send_resp_json(
+      403,
+      "Auth middleware 403!",
+      json.object([
+        (
+          "reason",
+          json.string("You aren't Administrator / Your token has expired!"),
+        ),
+      ]),
+    )
+
+  list = manager.list(ctx)
+
+  _ = echo list
+
+  responses.send_resp_json(201, "Here's the client listing!", json.null())
+}

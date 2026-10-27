@@ -1,7 +1,20 @@
+//// Application errors. Each kind of failure has its own type, so a
+//// function's return type says what can go wrong with it.
+
+/// Why a client couldn't be registered, found or logged in. The parameters
+/// are the underlying library errors: Argus's hashing error and SQLight's
+/// database error.
 pub type ClientError(hash_error, db_error) {
   HashingFailed(hash_error)
   DatabaseFailed(db_error)
   ClientNotFound
   InvalidPassword
   ClientDisabled
+}
+
+/// Why a registration request was rejected before reaching the database.
+pub type ValidationError {
+  InvalidUsername(String)
+  PasswordTooShort(String)
+  InvalidPermission(String)
 }

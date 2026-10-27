@@ -85,3 +85,39 @@ pub fn get_client(
     },
   )
 }
+
+/// Generated from src/beahive/sql/list_clients.sql
+pub type ListClientsRow {
+  ListClientsRow(
+    username: Option(String),
+    can_read: Int,
+    can_write: Int,
+    can_delete: Int,
+    enabled: Int,
+  )
+}
+
+/// Generated from src/beahive/sql/list_clients.sql
+pub fn list_clients(
+  db db: sqlight.Connection,
+) -> Result(List(ListClientsRow), sqlight.Error) {
+  sqlight.query(
+    "SELECT username, can_read, can_write, can_delete, enabled FROM clients ORDER BY username",
+    on: db,
+    with: [],
+    expecting: {
+      use username <- decode.field(0, decode.optional(decode.string))
+      use can_read <- decode.field(1, decode.int)
+      use can_write <- decode.field(2, decode.int)
+      use can_delete <- decode.field(3, decode.int)
+      use enabled <- decode.field(4, decode.int)
+      decode.success(ListClientsRow(
+        username:,
+        can_read:,
+        can_write:,
+        can_delete:,
+        enabled:,
+      ))
+    },
+  )
+}

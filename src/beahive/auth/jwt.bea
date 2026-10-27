@@ -1,4 +1,5 @@
-// src/beahive/auth/jwt.bea
+//// JWTs: signed with `JWT_SECRET` (HS256), valid for 15 minutes, issued
+//// by and for `beahive`.
 
 import gleam/json
 import gleam/time/duration
@@ -6,10 +7,12 @@ import gleam/time/duration
 import ywt
 import ywt/claim
 import ywt/sign_key
-
-import beahive/auth/types
 import ywt/verify_key
 
+import beahive/types
+
+/// A signed token for `auth`: its subject and role go in the payload, with
+/// expiry, issuer and audience claims.
 pub def generate(auth: types.Authenticated, key: sign_key.SignKey) {
   types.Authenticated(subject, role) = auth
 
@@ -32,6 +35,9 @@ pub def generate(auth: types.Authenticated, key: sign_key.SignKey) {
   ywt.encode(payload, claims, key)
 }
 
+/// The caller a token authenticates, when its signature and claims check
+/// out. Only administrator tokens are accepted for now: a valid client
+/// token is an `Error(Nil)` too.
 pub def verify(token: String, key: sign_key.SignKey) {
   verification_key = verify_key.derived(key)
 

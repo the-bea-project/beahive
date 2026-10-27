@@ -1,8 +1,10 @@
-// src/beahive/auth/headers.bea
+//// Reading credentials from request headers.
 
 import gleam/http/request.{type Request}
+
 import ewe
 
+/// The token of an `Authorization: Bearer <token>` header.
 pub def bearer_token(req: Request(ewe.Connection)) -> Result(String, Nil) {
   header = request.get_header(req, "authorization")?
 
